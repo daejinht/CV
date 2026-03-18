@@ -102,6 +102,22 @@
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzK-JwoMXlNSEGvPakCJ-u-l064Tawpce23rFQuWRqlZhH12eqjf3u5vb6teJaF1fShew/exec";
 
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.keyCode === 123) { // F12
+        e.preventDefault();
+      }
+      if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) { // Ctrl+Shift+I / J
+        e.preventDefault();
+      }
+      if (e.ctrlKey && e.keyCode === 85) { // Ctrl+U
+        e.preventDefault();
+      }
+    });
+
     function formatBirthDate(target) {
       let val = target.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
       let str = '';
@@ -208,6 +224,7 @@
         btn.innerText = "정보 제출하기";
       }
     }
+
   </script>
 </body>
 </html>
