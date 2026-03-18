@@ -2,19 +2,20 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>개인신상카드 갑지</title>
   <style>
-    body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background: #f0f2f5; color: #333; }
-    .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background: #f0f2f5; color: #333; margin: 0; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); box-sizing: border-box; }
     h2 { text-align: center; color: #1a73e8; margin-bottom: 25px; border-bottom: 2px solid #1a73e8; padding-bottom: 15px;}
     h3 { color: #555; border-left: 5px solid #1a73e8; padding-left: 10px; margin-top: 30px; margin-bottom: 15px; }
-    .input-group { margin-bottom: 18px; }
+    .input-group { margin-bottom: 18px; width: 100%; }
     label { display: block; font-weight: bold; margin-bottom: 7px; font-size: 14px; }
-    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+    input, select { width: 100%; padding: 12px 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
     input[readonly] { background: #f9f9f9; color: #777; border: 1px solid #eee; }
     .required { color: red; margin-left: 3px; }
-    .career-row { display: flex; gap: 10px; margin-bottom: 10px; }
-    .career-row input, .career-row div { flex: 1; }
+    .career-row { display: flex; gap: 10px; margin-bottom: 10px; width: 100%; }
+    .career-row > div, .career-row > input { flex: 1; }
     #milReasonGroup, #careerSection { display: none; }
     #careerSection { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px inset #eee; margin-top: 10px; }
     #milReasonGroup { background: #fff4f4; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #ffcccc; }
@@ -22,6 +23,13 @@
     .btn-remove { position: absolute; top: 10px; right: 10px; background: #ff4d4f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
     #btnAddCareer { background: #52c41a; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; margin-top: 10px; }
     #submitBtn { width: 100%; padding: 16px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 30px; }
+    
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .container { padding: 20px; }
+      .career-row { flex-direction: column; gap: 15px; }
+      .career-row > div, .career-row > input { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -33,7 +41,10 @@
       <div class="input-group"><label>성명<span class="required">*</span></label><input type="text" name="name" required></div>
       
       <div class="career-row">
-        <div class="input-group"><label>생년월일<span class="required">*</span></label><input type="date" name="birth" required></div>
+        <div class="input-group">
+          <label>생년월일<span class="required">*</span></label>
+          <input type="text" name="birth" placeholder="예: 1990-01-01" inputmode="numeric" oninput="formatBirthDate(this)" maxlength="10" required>
+        </div>
         <div class="input-group"><label>연령(만)<span class="required">*</span></label><input type="number" name="age" required></div>
         <div class="input-group">
           <label>혈액형<span class="required">*</span></label>
@@ -45,20 +56,20 @@
       </div>
 
       <div class="input-group">
-        <label>직위(기재 필수)<span class="required">*</span></label>
+        <label>직위<span class="required">*</span></label>
         <input type="text" name="mainPosition" placeholder="직종" required>
       </div>
 
       <div class="input-group"><label>현주소<span class="required">*</span></label><input type="text" name="address2" required></div>
       <div class="input-group"><label>휴대폰(HP)<span class="required">*</span></label>
-        <input type="text" name="hp" placeholder="010-0000-0000" oninput="formatPhoneNumber(this)" maxlength="13" required>
+        <input type="text" name="hp" placeholder="010-0000-0000" inputmode="numeric" oninput="formatPhoneNumber(this)" maxlength="13" required>
       </div>
 
       <h3>2. 비상연락망<span class="required">*</span></h3>
       <div class="career-row">
         <input type="text" name="emergencyRel" placeholder="관계" required>
         <input type="text" name="emergencyName" placeholder="성함" required>
-        <input type="text" name="emergencyTel" placeholder="연락처" oninput="formatPhoneNumber(this)" maxlength="13" required>
+        <input type="text" name="emergencyTel" placeholder="연락처" inputmode="numeric" oninput="formatPhoneNumber(this)" maxlength="13" required>
       </div>
 
       <h3>3. 병역 사항</h3>
@@ -90,6 +101,19 @@
 
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzK-JwoMXlNSEGvPakCJ-u-l064Tawpce23rFQuWRqlZhH12eqjf3u5vb6teJaF1fShew/exec";
+
+    function formatBirthDate(target) {
+      let val = target.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
+      let str = '';
+      if (val.length < 5) {
+        str = val;
+      } else if (val.length < 7) {
+        str = val.substr(0, 4) + '-' + val.substr(4);
+      } else {
+        str = val.substr(0, 4) + '-' + val.substr(4, 2) + '-' + val.substr(6, 2);
+      }
+      target.value = str;
+    }
 
     function formatPhoneNumber(target) {
       let val = target.value.replace(/[^0-9]/g, '');
@@ -127,7 +151,7 @@
         <div class="input-group"><label>근무기간</label><input type="text" class="c-period" placeholder="예: 2020.01 ~ 2022.01"></div>
         <div class="career-row">
           <div><label>근무처<span class="required">*</span></label><input type="text" class="c-company" placeholder="예: 1차업체(2차업체)"></div>
-          <div><label>직위<span class="required">*</span></label><input type="text" class="c-position" placeholder="예: 근무했던 당시 직종"></div>
+          <div><label>직위<span class="required">*</span></label><input type="text" class="c-position" placeholder="직종"></div>
           <div><label>담당업무</label><input type="text" class="c-job" placeholder="예: M15 현장 / 조공"></div>
         </div>`;
       list.appendChild(div);
@@ -156,7 +180,7 @@
       }
 
       const btn = document.getElementById('submitBtn');
-      btn.disabled = true; btn.innerText = "전송 중...";
+      btn.disabled = true; btn.innerText = "전송 중";
 
       const formData = {
         name: form.name.value, 
