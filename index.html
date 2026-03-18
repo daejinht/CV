@@ -74,6 +74,7 @@
       <div id="careerSection">
         <div id="careerList"></div>
         <button type="button" id="btnAddCareer" onclick="addCareerItem()">+ 경력 추가</button>
+        <p style="font-size: 12px; color: #666;">* 배관 경력은 모두 기재해주세요. </p>
       </div>
 
       <button type="button" id="submitBtn" onclick="submitData()">정보 제출하기</button>
@@ -83,16 +84,19 @@
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzK-JwoMXlNSEGvPakCJ-u-l064Tawpce23rFQuWRqlZhH12eqjf3u5vb6teJaF1fShew/exec";
 
-    // 강력한 하이픈 자동 완성 함수
     function formatPhoneNumber(target) {
       let val = target.value.replace(/[^0-9]/g, '');
-      if (val.length <= 3) {
-        target.value = val;
-      } else if (val.length <= 7) {
-        target.value = val.slice(0, 3) + '-' + val.slice(3);
+      let str = '';
+      if (val.length < 4) {
+        str = val;
+      } else if (val.length < 8) {
+        str = val.substr(0, 3) + '-' + val.substr(3);
+      } else if (val.length < 11) {
+        str = val.substr(0, 3) + '-' + val.substr(3, 3) + '-' + val.substr(6);
       } else {
-        target.value = val.slice(0, 3) + '-' + val.slice(3, 7) + '-' + val.slice(7, 11);
+        str = val.substr(0, 3) + '-' + val.substr(3, 4) + '-' + val.substr(7);
       }
+      target.value = str;
     }
 
     function toggleMilReason() {
@@ -134,7 +138,7 @@
           const comp = item.querySelector('.c-company').value.trim();
           const pos = item.querySelector('.c-position').value.trim();
           if(!comp || !pos) {
-            alert("경력이 '유'인 경우 근무처와 직위를 모두 입력해야 합니다.");
+            alert("경력 입력해주세요.");
             return;
           }
           careers.push({
