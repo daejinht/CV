@@ -44,14 +44,14 @@
       </div>
       <div class="input-group"><label>현주소<span class="required">*</span></label><input type="text" name="address2" required></div>
       <div class="input-group"><label>휴대폰(HP)<span class="required">*</span></label>
-        <input type="text" name="hp" placeholder="숫자만 입력" oninput="autoHyphen(this)" maxlength="13" required>
+        <input type="text" name="hp" placeholder="010-0000-0000" oninput="formatPhoneNumber(this)" maxlength="13" required>
       </div>
 
       <h3>2. 비상연락망<span class="required">*</span></h3>
       <div class="career-row">
         <input type="text" name="emergencyRel" placeholder="관계" required>
         <input type="text" name="emergencyName" placeholder="성함" required>
-        <input type="text" name="emergencyTel" placeholder="연락처(숫자만)" oninput="autoHyphen(this)" maxlength="13" required>
+        <input type="text" name="emergencyTel" placeholder="연락처" oninput="formatPhoneNumber(this)" maxlength="13" required>
       </div>
 
       <h3>3. 병역 사항</h3>
@@ -74,7 +74,6 @@
       <div id="careerSection">
         <div id="careerList"></div>
         <button type="button" id="btnAddCareer" onclick="addCareerItem()">+ 경력 추가</button>
-        <p style="font-size: 12px; color: #666;">* 배관 경력은 모두 기재해주세요.</p>
       </div>
 
       <button type="button" id="submitBtn" onclick="submitData()">정보 제출하기</button>
@@ -84,10 +83,16 @@
   <script>
     const GAS_URL = "https://script.google.com/macros/s/AKfycbzK-JwoMXlNSEGvPakCJ-u-l064Tawpce23rFQuWRqlZhH12eqjf3u5vb6teJaF1fShew/exec";
 
-    function autoHyphen(target) {
-      target.value = target.value
-        .replace(/[^0-9]/g, '')
-        .replace(/^(\d{2,3})(\d{3,4})(\d{4})$/, `$1-$2-$3`);
+    // 강력한 하이픈 자동 완성 함수
+    function formatPhoneNumber(target) {
+      let val = target.value.replace(/[^0-9]/g, '');
+      if (val.length <= 3) {
+        target.value = val;
+      } else if (val.length <= 7) {
+        target.value = val.slice(0, 3) + '-' + val.slice(3);
+      } else {
+        target.value = val.slice(0, 3) + '-' + val.slice(3, 7) + '-' + val.slice(7, 11);
+      }
     }
 
     function toggleMilReason() {
