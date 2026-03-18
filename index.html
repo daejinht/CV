@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>개인신상카드 갑지</title>
   <style>
- 
     body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background: #f0f2f5; color: #333; }
     .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     h2 { text-align: center; color: #1a73e8; margin-bottom: 25px; border-bottom: 2px solid #1a73e8; padding-bottom: 15px;}
@@ -33,7 +32,10 @@
       <div class="input-group"><label>소속회사</label><input type="text" value="(주)대진하이텍" readonly></div>
       <div class="input-group"><label>성명<span class="required">*</span></label><input type="text" name="name" required></div>
       <div class="career-row">
-        <div class="input-group"><label>생년월일<span class="required">*</span></label><input type="text" name="birth" placeholder="900101" required></div>
+        <div class="input-group">
+          <label>생년월일<span class="required">*</span></label>
+          <input type="date" name="birth" required>
+        </div>
         <div class="input-group"><label>연령(만)<span class="required">*</span></label><input type="number" name="age" required></div>
         <div class="input-group">
           <label>혈액형<span class="required">*</span></label>
@@ -45,12 +47,14 @@
       </div>
       <div class="input-group"><label>현주소<span class="required">*</span></label><input type="text" name="address2" required></div>
       <div class="input-group"><label>휴대폰(HP)<span class="required">*</span></label><input type="text" name="hp" placeholder="010-0000-0000" required></div>
+
       <h3>2. 비상연락망<span class="required">*</span></h3>
       <div class="career-row">
         <input type="text" name="emergencyRel" placeholder="관계" required>
         <input type="text" name="emergencyName" placeholder="성함" required>
         <input type="text" name="emergencyTel" placeholder="연락처" required>
       </div>
+
       <h3>3. 병역 사항</h3>
       <div class="input-group">
         <select name="military" id="military" onchange="toggleMilReason()" required>
@@ -58,6 +62,7 @@
         </select>
         <div id="milReasonGroup"><label>면제사유</label><input type="text" name="milReason" id="milReason"></div>
       </div>
+
       <h3>4. 경력사항 유무<span class="required">*</span></h3>
       <div class="input-group">
         <select id="hasCareer" onchange="toggleCareerSection()" required>
@@ -66,15 +71,13 @@
           <option value="유">유 (경력 있음)</option>
         </select>
       </div>
+
       <div id="careerSection">
         <div id="careerList"></div>
         <button type="button" id="btnAddCareer" onclick="addCareerItem()">+ 경력 추가</button>
-        <p style="font-size: 12px; color: #666;">* 배관 경력은 모두 기재해주세요.</p>
+        <p style="font-size: 12px; color: #666;">* 배관 경력은 모두 기재해주세요. (근무처와 직위는 필수입니다.)</p>
       </div>
-      <div id="careerSection">
-        <div id="careerList"></div>
-        <button type="button" id="btnAddCareer" onclick="addCareerItem()">+ 경력 추가</button>
-      </div>
+
       <button type="button" id="submitBtn" onclick="submitData()">정보 제출하기</button>
     </form>
   </div>
@@ -90,10 +93,8 @@
 
     function toggleCareerSection() {
       const hasCareer = document.getElementById('hasCareer').value === '유';
-      const section = document.getElementById('careerSection');
-      section.style.display = hasCareer ? 'block' : 'none';
-      const list = document.getElementById('careerList');
-      if (hasCareer && list.children.length === 0) addCareerItem();
+      document.getElementById('careerSection').style.display = hasCareer ? 'block' : 'none';
+      if (hasCareer && document.getElementById('careerList').children.length === 0) addCareerItem();
     }
 
     function addCareerItem() {
@@ -104,8 +105,8 @@
         <button type="button" class="btn-remove" onclick="this.parentElement.remove()">삭제</button>
         <div class="input-group"><label>근무기간</label><input type="text" class="c-period" placeholder="예: 2020.01 ~ 2022.01"></div>
         <div class="career-row">
-          <div><label>근무처</label><input type="text" class="c-company" placeholder="예: 1차업체(2차업체)"></div>
-          <div><label>직위</label><input type="text" class="c-position" placeholder="예: 직종"></div>
+          <div><label>근무처<span class="required">*</span></label><input type="text" class="c-company" placeholder="예: 1차업체(2차업체)"></div>
+          <div><label>직위<span class="required">*</span></label><input type="text" class="c-position" placeholder="예: 직종"></div>
           <div><label>담당업무</label><input type="text" class="c-job" placeholder="예: M15 현장 / 조공"></div>
         </div>`;
       list.appendChild(div);
@@ -118,21 +119,28 @@
       const hasCareer = document.getElementById('hasCareer').value;
       const careers = [];
       if (hasCareer === '유') {
-        document.querySelectorAll('.career-item').forEach(item => {
+        const items = document.querySelectorAll('.career-item');
+        for (let item of items) {
           const comp = item.querySelector('.c-company').value.trim();
-          if(comp) careers.push({
+          const pos = item.querySelector('.c-position').value.trim();
+          if(!comp || !pos) {
+            alert("경력이 '유'인 경우 근무처와 직위를 모두 입력해야 합니다.");
+            return;
+          }
+          careers.push({
             period: item.querySelector('.c-period').value,
-            company: comp, position: item.querySelector('.c-position').value, job: item.querySelector('.c-job').value
+            company: comp, position: pos, job: item.querySelector('.c-job').value
           });
-        });
-        if (careers.length === 0) { alert("경력을 입력해주세요."); return; }
+        }
       }
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true; btn.innerText = "전송 중...";
 
       const formData = {
-        name: form.name.value, birth: form.birth.value, age: form.age.value,
+        name: form.name.value, 
+        birth: form.birth.value, 
+        age: form.age.value,
         bloodType: form.bloodType.value, address2: form.address2.value, hp: form.hp.value,
         emergencyRel: form.emergencyRel.value, emergencyName: form.emergencyName.value, emergencyTel: form.emergencyTel.value,
         military: form.military.value, milReason: form.milReason.value,
@@ -140,16 +148,13 @@
       };
 
       try {
-        await fetch(GAS_URL, {
-          method: "POST",
-          mode: "no-cors", 
-          body: JSON.stringify(formData)
-        });
+        await fetch(GAS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(formData) });
         alert("정보가 성공적으로 전송되었습니다.");
         location.reload();
       } catch (e) {
         alert("오류 발생: " + e);
         btn.disabled = false;
+        btn.innerText = "정보 제출하기";
       }
     }
   </script>
