@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>개인신상카드 갑지</title>
+  <style>
+ 
+    body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; background: #f0f2f5; color: #333; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #1a73e8; margin-bottom: 25px; border-bottom: 2px solid #1a73e8; padding-bottom: 15px;}
+    h3 { color: #555; border-left: 5px solid #1a73e8; padding-left: 10px; margin-top: 30px; margin-bottom: 15px; }
+    .input-group { margin-bottom: 18px; }
+    label { display: block; font-weight: bold; margin-bottom: 7px; font-size: 14px; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 15px; }
+    input[readonly] { background: #f9f9f9; color: #777; border: 1px solid #eee; }
+    .required { color: red; margin-left: 3px; }
+    .career-row { display: flex; gap: 10px; margin-bottom: 10px; }
+    .career-row input, .career-row div { flex: 1; }
+    #milReasonGroup, #careerSection { display: none; }
+    #careerSection { background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px inset #eee; margin-top: 10px; }
+    #milReasonGroup { background: #fff4f4; padding: 15px; border-radius: 6px; margin-top: 10px; border: 1px solid #ffcccc; }
+    .career-item { border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: white; position: relative; }
+    .btn-remove { position: absolute; top: 10px; right: 10px; background: #ff4d4f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+    #btnAddCareer { background: #52c41a; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-bottom: 10px; margin-top: 10px; }
+    #submitBtn { width: 100%; padding: 16px; background: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>이력서 정보 입력</h2>
+    <form id="resumeForm">
+      <h3>1. 기본 정보</h3>
+      <div class="input-group"><label>소속회사</label><input type="text" value="(주)대진하이텍" readonly></div>
+      <div class="input-group"><label>성명<span class="required">*</span></label><input type="text" name="name" required></div>
+      <div class="career-row">
+        <div class="input-group"><label>생년월일<span class="required">*</span></label><input type="text" name="birth" placeholder="900101" required></div>
+        <div class="input-group"><label>연령(만)<span class="required">*</span></label><input type="number" name="age" required></div>
+        <div class="input-group">
+          <label>혈액형<span class="required">*</span></label>
+          <select name="bloodType" required>
+            <option value="">선택</option>
+            <option value="A형">A형</option><option value="B형">B형</option><option value="O형">O형</option><option value="AB형">AB형</option>
+          </select>
+        </div>
+      </div>
+      <div class="input-group"><label>현주소<span class="required">*</span></label><input type="text" name="address2" required></div>
+      <div class="input-group"><label>휴대폰(HP)<span class="required">*</span></label><input type="text" name="hp" placeholder="010-0000-0000" required></div>
+      <h3>2. 비상연락망<span class="required">*</span></h3>
+      <div class="career-row">
+        <input type="text" name="emergencyRel" placeholder="관계" required>
+        <input type="text" name="emergencyName" placeholder="성함" required>
+        <input type="text" name="emergencyTel" placeholder="연락처" required>
+      </div>
+      <h3>3. 병역 사항</h3>
+      <div class="input-group">
+        <select name="military" id="military" onchange="toggleMilReason()" required>
+          <option value="군필">군필</option><option value="미필">미필</option><option value="해당없음">해당없음</option>
+        </select>
+        <div id="milReasonGroup"><label>면제사유</label><input type="text" name="milReason" id="milReason"></div>
+      </div>
+      <h3>4. 경력사항 유무<span class="required">*</span></h3>
+      <div class="input-group">
+        <select id="hasCareer" onchange="toggleCareerSection()" required>
+          <option value="">선택하세요</option>
+          <option value="무">무 (경력 없음)</option>
+          <option value="유">유 (경력 있음)</option>
+        </select>
+      </div>
+      <div id="careerSection">
+        <div id="careerList"></div>
+        <button type="button" id="btnAddCareer" onclick="addCareerItem()">+ 경력 추가</button>
+        <p style="font-size: 12px; color: #666;">* 배관 경력은 모두 기재해주세요.</p>
+      </div>
+      <div id="careerSection">
+        <div id="careerList"></div>
+        <button type="button" id="btnAddCareer" onclick="addCareerItem()">+ 경력 추가</button>
+      </div>
+      <button type="button" id="submitBtn" onclick="submitData()">정보 제출하기</button>
+    </form>
+  </div>
+
+  <script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzK-JwoMXlNSEGvPakCJ-u-l064Tawpce23rFQuWRqlZhH12eqjf3u5vb6teJaF1fShew/exec";
+
+    function toggleMilReason() {
+      const isMil = document.getElementById('military').value === '미필';
+      document.getElementById('milReasonGroup').style.display = isMil ? 'block' : 'none';
+      document.getElementById('milReason').required = isMil;
+    }
+
+    function toggleCareerSection() {
+      const hasCareer = document.getElementById('hasCareer').value === '유';
+      const section = document.getElementById('careerSection');
+      section.style.display = hasCareer ? 'block' : 'none';
+      const list = document.getElementById('careerList');
+      if (hasCareer && list.children.length === 0) addCareerItem();
+    }
+
+    function addCareerItem() {
+      const list = document.getElementById('careerList');
+      const div = document.createElement('div');
+      div.className = 'career-item';
+      div.innerHTML = `
+        <button type="button" class="btn-remove" onclick="this.parentElement.remove()">삭제</button>
+        <div class="input-group"><label>근무기간</label><input type="text" class="c-period" placeholder="예: 2020.01 ~ 2022.01"></div>
+        <div class="career-row">
+          <div><label>근무처</label><input type="text" class="c-company" placeholder="예: 1차업체(2차업체)"></div>
+          <div><label>직위</label><input type="text" class="c-position" placeholder="예: 직종"></div>
+          <div><label>담당업무</label><input type="text" class="c-job" placeholder="예: M15 현장 / 조공"></div>
+        </div>`;
+      list.appendChild(div);
+    }
+
+    async function submitData() {
+      const form = document.getElementById('resumeForm');
+      if(!form.checkValidity()) { alert("필수 항목을 확인해주세요."); return; }
+      
+      const hasCareer = document.getElementById('hasCareer').value;
+      const careers = [];
+      if (hasCareer === '유') {
+        document.querySelectorAll('.career-item').forEach(item => {
+          const comp = item.querySelector('.c-company').value.trim();
+          if(comp) careers.push({
+            period: item.querySelector('.c-period').value,
+            company: comp, position: item.querySelector('.c-position').value, job: item.querySelector('.c-job').value
+          });
+        });
+        if (careers.length === 0) { alert("경력을 입력해주세요."); return; }
+      }
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true; btn.innerText = "전송 중...";
+
+      const formData = {
+        name: form.name.value, birth: form.birth.value, age: form.age.value,
+        bloodType: form.bloodType.value, address2: form.address2.value, hp: form.hp.value,
+        emergencyRel: form.emergencyRel.value, emergencyName: form.emergencyName.value, emergencyTel: form.emergencyTel.value,
+        military: form.military.value, milReason: form.milReason.value,
+        careers: careers
+      };
+
+      try {
+        await fetch(GAS_URL, {
+          method: "POST",
+          mode: "no-cors", 
+          body: JSON.stringify(formData)
+        });
+        alert("정보가 성공적으로 전송되었습니다.");
+        location.reload();
+      } catch (e) {
+        alert("오류 발생: " + e);
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
